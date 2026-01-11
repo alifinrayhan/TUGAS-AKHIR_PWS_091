@@ -1,0 +1,37 @@
+<body style="background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%); display: flex; align-items: center; min-height: 100vh; padding: 20px 0;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="card p-4 shadow-lg border-0" style="border-radius: 20px;">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold">Buat Akun Baru</h3>
+                        <p class="text-muted small">Bergabunglah dengan komunitas developer JKT48</p>
+                    </div>
+                    <form action="/register" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Username</label>
+                            <input type="text" name="username" class="form-control" style="border-radius: 10px;" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Email</label>
+                            <input type="email" name="email" class="form-control" style="border-radius: 10px;" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password</label>
+                            <input type="password" name="password" class="form-control" style="border-radius: 10px;" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-danger">Daftar Sebagai:</label>
+                            <select name="role" class="form-select" style="border-radius: 10px; border: 2px solid #df1f26;">
+                                <option value="user">Developer (User Biasa)</option>
+                                <option value="admin">Administrator (Kelola Data)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-jkt48 w-100 py-3 shadow">DAFTAR AKUN</button>
+                    </form>
+                    <p class="text-center mt-4 small">Sudah punya akun? <a href="/login" class="text-danger fw-bold text-decoration-none">Masuk</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
