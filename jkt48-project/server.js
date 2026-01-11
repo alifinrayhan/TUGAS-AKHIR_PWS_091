@@ -134,25 +134,28 @@ app.get('/api/members', async (req, res) => {
 });
 
 // Halaman untuk melihat tampilan profil cantik menggunakan API
-app.get('/view/members', async (req, res) => {
-    const [user] = await db.query('SELECT * FROM users WHERE api_key = ?', [req.query.api_key]);
-    if (!user.length) return res.status(401).send('API Key Salah!');
-
-    const [members] = await db.query('SELECT * FROM members');
-    res.render('view_members', { members }); // Merender file EJS baru
-});
-
 app.get('/view/members', isLogin, async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM users WHERE api_key = ?', [req.query.api_key]);
-        if (!rows.length) return res.status(401).send("API Key tidak valid!");
+        const apiKey = req.query.api_key;
 
+        // 1. Cek apakah API Key disertakan di URL
+        if (!apiKey) {
+            return res.status(401).send("<h1>Akses Ditolak</h1><p>Anda harus menyertakan API Key untuk melihat galeri.</p><a href='/dashboard'>Kembali ke Dashboard</a>");
+        }
+
+        // 2. Cek apakah API Key tersebut ada di database
+        const [userRows] = await db.query('SELECT * FROM users WHERE api_key = ?', [apiKey]);
+
+        if (userRows.length === 0) {
+            return res.status(401).send("<h1>API Key Tidak Valid</h1><p>Silakan gunakan API Key yang terdaftar di Dashboard Anda.</p><a href='/dashboard'>Kembali</a>");
+        }
+
+        // 3. Jika Valid, ambil data member
         const [members] = await db.query('SELECT * FROM members');
-        // Render file 'view_members.ejs'
-        res.render('view_members', { members }); 
+        res.render('view_members', { members });
     } catch (err) {
-        res.status(500).send("Error memuat galeri.");
+        console.error(err);
+        res.status(500).send("Terjadi kendala pada server.");
     }
 });
-
 app.listen(3000, () => console.log('Server Jalan: http://localhost:3000'));

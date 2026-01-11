@@ -3,19 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JKT48 Developer Portal</title>
+    <title>Dashboard - JKT48 Developer Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
         .navbar-brand { font-weight: bold; color: #ff0000 !important; }
         .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: 0.3s; }
-        .card:hover { transform: translateY(-5px); }
-        .api-box { background: #1a1d20; color: #00ff00; padding: 15px; border-radius: 10px; font-family: monospace; }
-        .btn-jkt48 { background-color: #df1f26; color: white; border-radius: 8px; font-weight: bold; }
-        .btn-jkt48:hover { background-color: #b1181d; color: white; }
+        /* Box API Key bergaya Terminal */
+        .api-box { background: #1a1d20; color: #00ff00; padding: 15px; border-radius: 10px; font-family: 'Consolas', monospace; border: 1px solid #333; }
+        .btn-jkt48 { background-color: #df1f26; color: white; border-radius: 8px; font-weight: bold; border: none; }
+        .btn-jkt48:hover { background-color: #b1181d; color: white; transform: scale(1.02); }
         .admin-badge { background-color: #ff0000; color: #fff; font-size: 0.7rem; padding: 4px 8px; border-radius: 5px; }
-        code { color: #df1f26; font-weight: bold; }
+        .copy-btn { cursor: pointer; color: #00ff00; transition: 0.2s; font-size: 1.2rem; }
+        .copy-btn:hover { color: #ffffff; }
+        .input-api { border: 2px solid #dee2e6; border-radius: 10px; padding: 12px; transition: 0.3s; }
+        .input-api:focus { border-color: #df1f26; box-shadow: 0 0 8px rgba(223, 31, 38, 0.2); outline: none; }
     </style>
 </head>
 <body>
@@ -28,79 +31,124 @@
                     Halo, <strong><%= user.username %></strong> 
                     <% if (user.role === 'admin') { %> <span class="badge admin-badge ms-1">ADMIN</span> <% } %>
                 </span>
-                <a href="/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3">Keluar</a>
+                <a href="/logout" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold">Logout</a>
             </div>
         </div>
     </nav>
 
     <div class="container pb-5">
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-md-11">
                 
                 <% if (user.role === 'admin') { %>
-                <div class="card mb-4 border-start border-danger border-5">
-                    <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap">
+                <div class="card mb-4 border-start border-danger border-5 shadow-sm">
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
                         <div>
                             <h4 class="text-danger fw-bold mb-1"><i class="fas fa-user-shield me-2"></i>Mode Administrator</h4>
-                            <p class="text-muted mb-0">Kelola database member dan sinkronisasi data.</p>
+                            <p class="text-muted mb-0">Kelola database member dan akses seluruh pengguna.</p>
                         </div>
-                        <a href="/admin" class="btn btn-danger px-4 py-2 shadow-sm"><i class="fas fa-cog me-2"></i>Panel Admin</a>
+                        <a href="/admin" class="btn btn-danger px-4 py-2 fw-bold shadow-sm">Buka Panel Admin</a>
                     </div>
                 </div>
                 <% } %>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="card h-100 shadow-sm">
                             <div class="card-body p-4">
-                                <h5 class="fw-bold mb-3"><i class="fas fa-code text-primary me-2"></i>Data Mentah (JSON)</h5>
-                                <p class="small text-muted">Gunakan link ini untuk mengambil data dalam format JSON untuk aplikasi/coding.</p>
+                                <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-key me-2"></i>API Access Key</h5>
                                 
                                 <% if (user.api_key) { %>
-                                    <div class="api-box mb-3 small">
-                                        <code><%= user.api_key %></code>
+                                    <p class="small text-muted mb-2">Salin kode rahasia Anda di bawah ini:</p>
+                                    <div class="api-box mb-3 d-flex justify-content-between align-items-center">
+                                        <code id="apiSecret" style="font-size: 1.2rem; letter-spacing: 1px;"><%= user.api_key %></code>
+                                        <i class="far fa-copy copy-btn" onclick="copyText('apiSecret')" title="Salin Key"></i>
                                     </div>
-                                    <a href="/api/members?api_key=<%= user.api_key %>" target="_blank" class="btn btn-dark w-100 mb-2">
-                                        <i class="fas fa-file-code me-2"></i>Buka JSON Mentah
-                                    </a>
+                                    <form action="/generate-key" method="POST">
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm w-100 mt-2 rounded-3">
+                                            <i class="fas fa-sync-alt me-1"></i> Regenerasi API Key
+                                        </button>
+                                    </form>
                                 <% } else { %>
-                                    <div class="alert alert-warning small">API Key belum dibuat.</div>
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-lock fa-3x text-muted mb-3 opacity-25"></i>
+                                        <p class="fw-bold text-muted mb-3">API Key Belum Tersedia</p>
+                                        <form action="/generate-key" method="POST">
+                                            <button type="submit" class="btn btn-jkt48 px-4 py-2">Buat Key Sekarang</button>
+                                        </form>
+                                    </div>
                                 <% } %>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100 border-top border-primary border-4">
-                            <div class="card-body p-4 text-center">
-                                <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-eye me-2"></i>Visual Preview</h5>
-                                <p class="small text-muted">Lihat bagaimana data kamu tampil dalam bentuk Galeri yang cantik.</p>
+                    <div class="col-md-7">
+                        <div class="card h-100 border-top border-danger border-4 shadow-sm">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3 text-danger"><i class="fas fa-plug me-2"></i>Access Portal</h5>
+                                <p class="small text-muted mb-3">Tempelkan <b>API Key</b> Anda untuk membuka akses database:</p>
                                 
-                                <% if (user.api_key) { %>
-                                    <div class="py-3">
-                                        <i class="fas fa-images fa-3x text-light-emphasis mb-3"></i>
+                                <div class="mb-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="fas fa-shield-alt text-muted"></i></span>
+                                        <input type="text" id="apiInput" class="form-control input-api border-start-0" placeholder="Paste API Key di sini...">
                                     </div>
-                                    <a href="/view/members?api_key=<%= user.api_key %>" target="_blank" class="btn btn-primary w-100 shadow-sm">
-                                        <i class="fas fa-th-large me-2"></i>Buka Galeri Member
-                                    </a>
-                                <% } else { %>
-                                    <button class="btn btn-secondary w-100" disabled>API Key Diperlukan</button>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <button onclick="openLink('json')" class="btn btn-dark btn-lg w-100 fs-6 shadow-sm <%= !user.api_key ? 'disabled' : '' %>">
+                                            <i class="fas fa-file-code me-2"></i>View Raw JSON
+                                        </button>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <button onclick="openLink('visual')" class="btn btn-danger btn-lg w-100 fs-6 shadow-sm <%= !user.api_key ? 'disabled' : '' %>">
+                                            <i class="fas fa-images me-2"></i>View Visual Gallery
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <% if (!user.api_key) { %>
+                                    <div class="mt-4 p-3 bg-light rounded-3 text-center border">
+                                        <span class="text-danger small fw-bold">Fitur akses terkunci hingga API Key dibuat.</span>
+                                    </div>
                                 <% } %>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="text-center mt-2">
-                    <form action="/generate-key" method="POST">
-                        <button type="submit" class="btn btn-jkt48 px-5 py-2 shadow">
-                            <i class="fas fa-sync-alt me-2"></i><%= user.api_key ? 'Update / Ganti API Key' : 'Buat API Key Baru' %>
-                        </button>
-                    </form>
                 </div>
 
             </div>
         </div>
     </div>
+
+    <script>
+        function copyText(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("API Key berhasil disalin!");
+            });
+        }
+
+        function openLink(mode) {
+            const apiKey = document.getElementById('apiInput').value.trim();
+            const baseUrl = window.location.origin;
+            
+            if (!apiKey) {
+                alert("Peringatan: Tempelkan API Key Anda terlebih dahulu!");
+                return;
+            }
+
+            // Jika user menempelkan kode singkat, kita bangun URL-nya secara otomatis
+            let targetUrl = "";
+            if (mode === 'json') {
+                targetUrl = `${baseUrl}/api/members?api_key=${apiKey}`;
+            } else {
+                targetUrl = `${baseUrl}/view/members?api_key=${apiKey}`;
+            }
+
+            window.open(targetUrl, '_blank');
+        }
+    </script>
 </body>
 </html>
